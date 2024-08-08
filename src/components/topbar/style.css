@@ -1,0 +1,16 @@
+.topbar {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    background-color: #1c1c1f;
+    width: 97.3%;
+    height: 60px;
+    column-gap: 10px;
+    box-shadow: 0 5px 10px rgba(0, 0, 0, 0.1);
+    padding-left: 50px;
+}
+
+
+.topbar Button:first-child {
+    margin-left: 50px;
+}
