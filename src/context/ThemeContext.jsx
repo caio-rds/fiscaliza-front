@@ -46,7 +46,7 @@ const ThemeContextProvider = ({ children }) => {
             MuiToolbar: {
                 styleOverrides: {
                     root: {
-                        background: 'transparent',
+                        background: mode === 'light' ? '#fff' : '#333',
                     },
                 },
             },
@@ -59,9 +59,12 @@ const ThemeContextProvider = ({ children }) => {
             },
             MuiButton: {
                 styleOverrides: {
-                    root: {                        
+                    root: {                                            
+                        color: mode === 'light' ? '#333' : '#fff',
                         '&:hover': {
+                            background: 'var(--secondary-color)',
                             outline: mode === 'light' ? 'var(--primary-color)' : '',
+                            color: '#333'
                         },                        
                     }
                 },

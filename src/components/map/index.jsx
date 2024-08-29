@@ -2,26 +2,19 @@ import { Box } from "@mui/material";
 import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
+import PropTypes from "prop-types";
+import { useEffect } from "react";
+import { useState } from "react";
+import { useRef } from "react";
 
 // Defina o estilo do container do mapa
 const containerStyle = {
-  width: "600px",
-  height: "600px",
+  width: "100%",
+  height: "650px",
   borderRadius: "8px",
+  boxShadow: "5px 5px 10px rgba(0,0,0,0.5)",
 };
 
-// Defina o centro do mapa
-const center = {
-  lat: -22.8777019,
-  lon: -43.4575497,
-};
-
-// Defina as coordenadas das marcações
-const markers = [
-  { id: 1, position: { lat: -22.8777019, lng: -43.4575497 } },
-  { id: 2, position: { lat: -22.8921655, lng: -43.4547179 } },
-  { id: 3, position: { lat: -22.8827893, lng: -43.466438 } },
-];
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -33,58 +26,63 @@ L.Icon.Default.mergeOptions({
     "https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png",
 });
 
-export default function MapReport({ report }) {
+export default function MapReport({ reports, current_report }) {
+  const [center, setCenter] = useState(current_report);
+  const [zoom, setZoom] = useState(16); 
+  const mapRef = useRef();
+
+
+  useEffect(() => {        
+    if (mapRef.current) {
+      mapRef.current.setView([current_report.lat, current_report.lon], 14);
+      for (let i = 14; i < 17; i++) {
+        setTimeout(() => {
+          mapRef.current.flyTo([current_report.lat, current_report.lon], i);
+        }, 1000);
+        
+      }    
+      setCenter({ lat: current_report.lat, lon: current_report.lon });
+    }
+    if (current_report.lat === 0 && current_report.lon === 0) {      
+      setZoom(2);
+    }    
+  }, [current_report]);
+
+
   return (
     <Box
       display={"flex"}
       justifyContent={"center"}
       alignItems={"center"}
       padding={"20px"}
-      width={"100%"}
+      width={"50%"}
     >
       <MapContainer
-        center={{ lat: report.lat, lon: report.lon }}
-        zoom={15}
+        center={center}
+        zoom={zoom}
         style={containerStyle}
+        ref={mapRef}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        {Object.keys(report).length > 0 && (
-          <Marker position={{ lat: report.lat, lon: report.lon }}>
+        {reports.map((report) => (
+          <Marker style={{transform: 'scale(1.0)'}} key={report.id} position={[report.lat, report.lon]}>
             <Popup>
-              <Box>
-                <Box>
-                  <strong>Report</strong>
-                </Box>
-                <Box>
-                  <strong>Username:</strong> {report.username}
-                </Box>
-                <Box>
-                  <strong>Report:</strong> {report.report}
-                </Box>
-                <Box>
-                  <strong>Street:</strong> {report.street}
-                </Box>
-                <Box>
-                  <strong>District:</strong> {report.district}
-                </Box>
-                <Box>
-                  <strong>City:</strong> {report.city}
-                </Box>
-                <Box>
-                  <strong>State:</strong> {report.state}
-                </Box>
-                <Box>
-                  <strong>Created at:</strong>{" "}
-                  {new Date(report.created_at).toLocaleString()}
-                </Box>
-              </Box>
+              {report.description}
             </Popup>
           </Marker>
-        )}
+        ))}
       </MapContainer>
     </Box>
   );
 }
+
+MapReport.propTypes = {
+  reports: PropTypes.array.isRequired,
+  current_report: PropTypes.shape({
+    lat: PropTypes.number,
+    lon: PropTypes.number,
+  }).isRequired,
+};

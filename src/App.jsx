@@ -8,22 +8,35 @@ import RegisterUser from "./components/userCreate";
 import RecoveryUser from "./components/recovery";
 import MyProfile from "./components/profile";
 import ReportRegister from "./components/reportRegister";
+import SearchReport from "./components/reportSearch";
+import PrivateRoutes from "./routes/PrivateRoutes";
+import UnauthRoutes from "./routes/UnauthRoutes";
+
+
 
 export default function App() {
   return (
-    <Main>
+    <Main>      
       <BrowserRouter>
         <Routes>
-          <Route index path="/" element={<NoLogin />} />
-          <Route index path="/inicio" element={<NoLogin />} />
-          <Route index path="/reports" element={<Reports />} />
-          <Route index path="/reports/new" element={<ReportRegister />} />
-          <Route index path="/login" element={<Login />} />
-          <Route index path="/register" element={<RegisterUser />} />
-          <Route index path="/recovery" element={<RecoveryUser />} />
-          <Route index path="/profile" element={<MyProfile />} />
+          <Route element={<UnauthRoutes />}>
+            <Route index path="/" element={<NoLogin />} />
+            <Route index path="/inicio" element={<NoLogin />} />
+            <Route index path="/login" element={<Login />} />
+            <Route index path="/register" element={<RegisterUser />} />
+            <Route index path="/recovery" element={<RecoveryUser />} />
+          </Route> 
+          <Route element={<PrivateRoutes />}>
+            <Route index path="/reports" element={<Reports />} />
+            <Route index path="/reports/new" element={<ReportRegister />} />
+            <Route index path="/reports/search/:id" element={<SearchReport />} />
+            <Route index path="/reports/search" element={<SearchReport />} />
+            <Route index path="/profile" element={<MyProfile />} />
+          </Route>
+
+
         </Routes>
       </BrowserRouter>
-    </Main>
+      </Main>
   );
 }

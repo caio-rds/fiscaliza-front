@@ -1,12 +1,10 @@
-import { Outlet, Navigate } from 'react-router-dom'
-import { useAuthContext } from '../contexts/AuthContext'
+import { Outlet } from 'react-router-dom'
+import useAuthContext from '../hooks/useAuthContext'
 
 function UnauthRoutes() {
-  const { isLoggedIn } = useAuthContext()
+  const { user } = useAuthContext()
 
-  if (isLoggedIn === null) return <>a</>
-
-  return !isLoggedIn ? <Outlet /> : <Navigate to="/" />
+  return !user ? <Outlet /> : <Outlet />
 }
 
 export default UnauthRoutes

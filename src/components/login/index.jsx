@@ -2,9 +2,15 @@ import { Box, Button, Divider, TextField, Typography } from "@mui/material";
 import animationData from "../../assets/login.json";
 import Lottie from "react-lottie";
 import useThemeContext from "../../hooks/useThemeContext";
+import { useState } from "react";
+import useAuthContext from "../../hooks/useAuthContext";
 
 export default function Login() {
-  const { mode } = useThemeContext();
+  const { mode } = useThemeContext();      
+  const [user, setUser] = useState("");
+  const [password, setPassword] = useState("");
+  const { tryLogin } = useAuthContext();
+
 
   const defaultOptions = {
     loop: true,
@@ -14,6 +20,14 @@ export default function Login() {
       preserveAspectRatio: "xMidYMid slice",
     },
   };
+
+  const handleLogin = async (event) => {
+    event.preventDefault();
+    const formData = new FormData();
+    formData.append('username', user);
+    formData.append('password', password);
+    tryLogin(formData).then();
+  }
 
   return (
     <Box sx={{ height: "100%" }} className={"flexRow"} columnGap={"100px"}>
@@ -37,12 +51,13 @@ export default function Login() {
           />
           <Typography variant={"h5"}>Login Fiscaliza</Typography>
         </Box>
-        <TextField sx={{ width: "100%" }} label="Usuário" variant="outlined" />
+        <TextField sx={{ width: "100%" }} label="Usuário" variant="outlined" onChange={(e) => setUser(e.target.value)} />
         <TextField
           sx={{ width: "100%" }}
           label="Senha"
           variant="outlined"
           type="password"
+          onChange={(e) => setPassword(e.target.value)}
         />
 
         <Button
@@ -55,6 +70,7 @@ export default function Login() {
           }}
           variant="contained"
           color="primary"
+          onClick={handleLogin}
         >
           Entrar
         </Button>

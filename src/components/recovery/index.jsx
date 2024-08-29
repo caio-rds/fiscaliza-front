@@ -2,9 +2,11 @@ import { Box, Button, Divider, TextField, Typography } from "@mui/material";
 import animationData from "../../assets/recovery.json";
 import Lottie from "react-lottie";
 import useThemeContext from "../../hooks/useThemeContext";
+import { useState } from "react";
 
 export default function RecoveryUser() {
   const { mode } = useThemeContext();
+  const [user, setUser] = useState("");
 
   const defaultOptions = {
     loop: true,
@@ -94,7 +96,12 @@ export default function RecoveryUser() {
           sx={{ width: "100%" }}
           label="Usuário ou Email"
           variant="outlined"
+          value={user}
+          onChange={(e) => setUser(e.target.value)}          
         />
+        {
+          user && chooseRecovery()
+        }
 
         <Button
           sx={{

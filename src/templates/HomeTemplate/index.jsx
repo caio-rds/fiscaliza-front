@@ -2,22 +2,35 @@ import { useState } from "react";
 import TopBar from "../../components/topbar";
 import { Drawer, List, ListItem, ListItemButton, ListItemIcon, ListItemText } from "@mui/material";
 import SwitchButton from "../../components/switch";
-import InboxIcon from "@mui/icons-material/MoveToInbox";
-import MailIcon from "@mui/icons-material/Mail";
 import PropTypes from "prop-types";
+import HomeIcon from "@mui/icons-material/Home";
+import ReportIcon from "@mui/icons-material/Report";
+import AddBoxIcon from "@mui/icons-material/AddBox";
+import SearchIcon from "@mui/icons-material/Search";
+import Person from "@mui/icons-material/Person";
+import DisabledByDefaultIcon from '@mui/icons-material/DisabledByDefault';
+import useAuthContext from "../../hooks/useAuthContext";
+
+
+
 
 const urls = [
-  { name: "Início", url: "/" },
-  { name: "Reports", url: "/reports" },
-  { name: "Profile", url: "/profile" },
-  { name: "Sair", url: "/sair" },
+  { name: "Início", url: "/", icon: <HomeIcon />, user: false },
+  { name: "Reports", url: "/reports", icon: <ReportIcon />, user: true },
+  { name: "Criar Report", url: "/reports/new", icon: <AddBoxIcon />, user: true },  
+  { name: "Procurar Report", url: "/reports/search", icon: <SearchIcon />, user: true },
+  { name: "Profile", url: "/profile", icon: <Person />, user: true},
+  { name: "Deslogar", url: "/sair", icon: <DisabledByDefaultIcon />, user: true },
 ];
 
-const setUrl = (url) => {
-  window.location.href = url;
-};
 
 export function HomeTemplate({ children }) {
+
+  const { user, logout } = useAuthContext();
+
+  const setUrl = (url) => {
+    window.location.href = url
+  }
 
   const [sideMenu, setSideMenu] = useState(false);  
 
@@ -44,16 +57,21 @@ export function HomeTemplate({ children }) {
       >
         <List>
           {urls.map((url, index) => (
-            <ListItem key={index} onClick={() => setUrl(url.url)}>
-              <ListItemButton>
-                <ListItemIcon>
-                  {index % 2 === 0 ? <InboxIcon /> : <MailIcon />}
-                </ListItemIcon>
+            user && url.user ? (              
+              <ListItemButton key={index} onClick={url.url === '/sair' ? logout : () => setUrl(url.url)}>
+                <ListItemIcon>{url.icon}</ListItemIcon>
                 <ListItemText primary={url.name} />
               </ListItemButton>
-            </ListItem>
+            ) : !url.user ? (
+              <ListItemButton key={index} onClick={() => setUrl(url.url)}>
+                <ListItemIcon>{url.icon}</ListItemIcon>
+                <ListItemText primary={url.name} />
+              </ListItemButton>
+            ) : null
           ))}
-          <SwitchButton />
+          <ListItem>
+            <SwitchButton />
+          </ListItem>
         </List>
       </Drawer>
 

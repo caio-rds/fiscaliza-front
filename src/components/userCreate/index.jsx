@@ -1,42 +1,8 @@
-import { useState, useEffect } from "react";
 import { Box, Button, TextField, Typography } from "@mui/material";
 import useThemeContext from "../../hooks/useThemeContext";
 
 export default function RegisterUser() {
   const { mode } = useThemeContext();
-
-  const [latitude, setLatitude] = useState(null);
-  const [longitude, setLongitude] = useState(null);
-  const [error, setError] = useState(null);
-
-  useEffect(() => {
-    if (navigator.geolocation) {
-      navigator.geolocation.getCurrentPosition(
-        (position) => {
-          setLatitude(position.coords.latitude);
-          setLongitude(position.coords.longitude);
-        },
-        (error) => {
-          switch (error.code) {
-            case error.PERMISSION_DENIED:
-              setError("Usuário negou a solicitação de Geolocalização.");
-              break;
-            case error.POSITION_UNAVAILABLE:
-              setError("Informações de localização não estão disponíveis.");
-              break;
-            case error.TIMEOUT:
-              setError("A solicitação para obter a localização expirou.");
-              break;
-            default:
-              setError("Ocorreu um erro desconhecido.");
-              break;
-          }
-        }
-      );
-    } else {
-      setError("Geolocalização não é suportada por este navegador.");
-    }
-  }, []);
 
   return (
     <Box sx={{ height: "100%" }} className={"flexRow"} columnGap={"100px"}>
@@ -98,7 +64,6 @@ export default function RegisterUser() {
           }}
           variant="contained"
           color="primary"
-          onClick={() => console.log(latitude, longitude)}
         >
           Entrar
         </Button>
