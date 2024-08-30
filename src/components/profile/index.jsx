@@ -25,9 +25,9 @@ const style = {
 
 export default function MyProfile() {
   const [user, setUser] = useState({
-    username: "",
-    email: "",
-    phone: "",
+    username: "0",
+    email: "0",
+    phone: "0",
     address: {
       street: "",
       number: "",
@@ -42,16 +42,18 @@ export default function MyProfile() {
   const [userEditing, setuserEditing] = useState(false);
   const [addressEditing, setAddressEditing] = useState(false);
   const [mapShow, setMapShow] = useState(false); 
-
+  
   useEffect(() => {    
     const fetchData = async () => {
       try {
-        const response = await axios.get(serverURL + 'user/caiords', {
+        const response = await axios.get(`${serverURL}user/caiords`, {
           headers: {
             'Content-Type': 'application/json, charset=utf-8',
+            "ngrok-skip-browser-warning": true,
+            'Allow-Control-Allow-Origin': '*',
           },
           params: {
-            posts: true,
+            posts: true            
           },
         });
         setUser(response.data);
@@ -178,7 +180,7 @@ export default function MyProfile() {
               Membro desde
             </Typography>
             <Typography gutterBottom variant="body2" component="div">
-              {new Date("2024-07-04T01:12:19.821-03:00").getDate() + "/" + new Date("2024-07-04T01:12:19.821-03:00").getMonth() + "/" + new Date("2024-07-04T01:12:19.821-03:00").getFullYear()}
+              {new Date(user.createdAt).getDate() + "/" + new Date(user.createdAt).getMonth() + "/" + new Date(user.createdAt).getFullYear()}
             </Typography>
           </Stack>
         </Box> 

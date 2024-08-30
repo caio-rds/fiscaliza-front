@@ -22,6 +22,8 @@ const useAxios = () => {
           config.headers['Authorization'] = `Bearer ${token}`;
         }
       }
+      config.headers['Content-Type'] = 'application/json, charset=utf-8';
+      config.headers['ngrok-skip-browser-warning'] = 'true';
       return config;
     },
     (error) => {

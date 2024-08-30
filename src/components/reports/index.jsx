@@ -32,7 +32,7 @@ export default function Reports() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get(serverURL + "report");
+        const response = await axiosInstance.get(serverURL + "report/");
         
         setReports(response.data);
         if (response.data.length > 0) {
