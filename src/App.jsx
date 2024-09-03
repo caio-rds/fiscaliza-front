@@ -2,7 +2,7 @@ import "./App.css";
 import { Route, BrowserRouter, Routes } from "react-router-dom";
 import Main from "./components/main";
 import NoLogin from "./components/home";
-import Reports from "./components/reports";
+import Reports from "./components/reportsPage";
 import Login from "./components/login";
 import RegisterUser from "./components/userCreate";
 import RecoveryUser from "./components/recovery";
@@ -11,6 +11,7 @@ import ReportRegister from "./components/reportRegister";
 import SearchReport from "./components/reportSearch";
 import PrivateRoutes from "./routes/PrivateRoutes";
 import UnauthRoutes from "./routes/UnauthRoutes";
+import AboutUs from "./components/aboutUs";
 
 
 
@@ -25,6 +26,7 @@ export default function App() {
             <Route index path="/login" element={<Login />} />
             <Route index path="/register" element={<RegisterUser />} />
             <Route index path="/recovery" element={<RecoveryUser />} />
+            <Route index path="/about" element={<AboutUs />} />
           </Route> 
           <Route element={<PrivateRoutes />}>
             <Route index path="/reports" element={<Reports />} />

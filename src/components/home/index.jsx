@@ -1,6 +1,7 @@
 import { Box, Button, Typography } from "@mui/material";
 import animationData from "../../assets/welcome.json";
 import Lottie from "react-lottie";
+import useAuthContext from "../../hooks/useAuthContext";
 
 
 export default function NoLogin() {
@@ -13,12 +14,11 @@ export default function NoLogin() {
     },    
   };
 
-
+  const { user } = useAuthContext();
 
   return (
     <Box
-      sx={{        
-        textAlign: "center",
+      sx={{                
         width: "100%",
         height: "100vh",
         overflow: "hidden",
@@ -27,29 +27,26 @@ export default function NoLogin() {
     >
       <Box
         sx={{
-          height: "92%",
-          marginTop: "10%",
+          height: "92%",          
           justifyContent: "flex-start",
-          rowGap: "10px",
-          marginLeft: { xs: "0", md: "15%" },
-          zIndex: "1",
+          rowGap: "10px",          
         }}
         className={"flexColumn"}
       >
         <Typography textAlign={"center"} variant={"h3"}>
           Plataforma Fiscaliza
         </Typography>
-        <Box className={"flexRow"} columnGap={'10px'}>
+        <Box className={"flexRow"} width={{xs: "100%", md: "70%"}} display={'flex'} justifyContent={'space-between'}>
           <Lottie
             options={defaultOptions}
-            height={420}
-            width={420}
+            height={400}
+            width={400}
             isPaused={false}
             isStopped={false}
             isClickToPauseDisabled={true}          
           />
-          <Box width={{xs: "100%", md: "70%"}} className={"flexColumn"}>
-            <Typography variant={"body1"} textAlign={"justify"} maxWidth={"70%"}>
+          
+          <Typography variant={"body1"} textAlign={"left"} width={{xs: "100%", md: "50%"}} paddingRight={'20px'}>
               Com nossa plataforma você pode acompanhar as notícias e eventos da sua
               vizinhança, além de poder denunciar problemas de infraestrutura e
               segurança.
@@ -61,7 +58,10 @@ export default function NoLogin() {
               <br />
               Faça parte da nossa comunidade e ajude a construir um lugar melhor
               para todos.
-            </Typography>
+            </Typography> 
+        </Box>
+        {
+          user ? (
             <Box
               sx={{
                 display: "flex",
@@ -73,23 +73,47 @@ export default function NoLogin() {
               }}
             >
               <Typography variant={"body2"} textAlign={"left"}>
-                Não tem conta?
+                Veja o que está acontecendo na sua vizinhança
               </Typography>
               <Button
                 sx={{
                   width: "100%",
-                  height: "60px",
-                  backgroundColor: "var(--secondary-color)",
-                  color: "#333",
+                  height: "60px"
                 }}
-                onClick={() => window.location.href = "/register"}
+                onClick={() => window.location.href = "/reports"}
                 variant={"contained"}
               >
-                Crie a sua conta grátis
+                Ver Ocorrências
               </Button>
             </Box>
+          ) : (
+          <Box
+              sx={{
+                display: "flex",
+                flexDirection: "column",
+                alignItems: "flex-start",
+                width: "70%",
+                rowGap: "2px",   
+                marginTop: "40px",         
+              }}
+            >
+            <Typography variant={"body2"} textAlign={"left"}>
+              Não tem conta?
+            </Typography>
+            <Button
+              sx={{
+                width: "100%",
+                height: "60px"
+              }}
+              onClick={() => window.location.href = "/register"}
+              variant={"contained"}
+            >
+              Crie a sua conta grátis
+            </Button>
           </Box>
-        </Box>
+          )
+        }
+
       </Box>
     </Box>
   );

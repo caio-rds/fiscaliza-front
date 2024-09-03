@@ -35,6 +35,15 @@ const ThemeContextProvider = ({ children }) => {
                     },
                 },
             },
+            MuiSelect: {
+                styleOverrides: {
+                    root: {
+                        '&:hover .MuiOutlinedInput-notchedOutline': {
+                            borderColor: 'var(--primary-color)', // Cor quando passa o mouse
+                        },
+                    }
+                },
+            },            
             MuiAppBar: {
                 styleOverrides: {
                     root: {
@@ -46,7 +55,7 @@ const ThemeContextProvider = ({ children }) => {
             MuiToolbar: {
                 styleOverrides: {
                     root: {
-                        background: mode === 'light' ? '#fff' : '#333',
+                        background: mode === "light" ? "#CDCDCD" : "#19181D",
                     },
                 },
             },
@@ -59,12 +68,11 @@ const ThemeContextProvider = ({ children }) => {
             },
             MuiButton: {
                 styleOverrides: {
-                    root: {                                            
-                        color: mode === 'light' ? '#333' : '#fff',
+                    root: {                   
                         '&:hover': {
-                            background: 'var(--secondary-color)',
+                            // background: 'var(--secondary-color)',
                             outline: mode === 'light' ? 'var(--primary-color)' : '',
-                            color: '#333'
+                           
                         },                        
                     }
                 },
@@ -73,19 +81,19 @@ const ThemeContextProvider = ({ children }) => {
                 styleOverrides: {
                     root: {
                         '&:hover .MuiOutlinedInput-root .MuiOutlinedInput-notchedOutline': {
-                            borderColor: 'var(--secondary-color-light)', // Cor quando passa o mouse
+                            borderColor: 'var(--primary-color)', // Cor quando passa o mouse
                         },
                         '& .MuiOutlinedInput-root.Mui-focused .MuiOutlinedInput-notchedOutline': {
-                            borderColor: mode === 'light' ? '#999' : 'var(--secondary-color)', // Cor quando focado
+                            borderColor: mode === 'light' ? '#999' : 'var(--primary-color)', // Cor quando focado
                         },   
                         '& .MuiInputLabel-root.Mui-focused': {
-                            color: mode === 'light' ? '#666' : 'var(--secondary-color)', // Cor do label quando focado
+                            color: mode === 'light' ? '#666' : 'var(--primary-color)', // Cor do label quando focado
                         },
                         '& .MuiOutlinedInput-root.Mui-focused .MuiInputBase-input': {
                             color: mode === 'light' ? '#333' : '#fff', // Cor do texto do input quando focado
                         },   
-                        '&:-webkit-autofill': {
-                            WebkitBoxShadow: '0 0 0 1000px white inset', // Remove o fundo amarelo do autocomplete
+                        '&:-webkit-autofill-active': {
+                            WebkitBoxShadow: '0 0 0 30px #f7f7f7 inset',
                             WebkitTextFillColor: 'inherit', // Mantém a cor do texto                            
                         },                  
                     },
@@ -107,25 +115,43 @@ const ThemeContextProvider = ({ children }) => {
                     }
                 },
             },
-            MuiDataGrid: {
+            MuiAccordion: {
                 styleOverrides: {
-                    sortIcon: {
-                        color: mode === 'light' ? '#333' : '#fff',
-                    },
                     root: {
-                        boxShadow: mode === 'light' ? '5px 5px 10px rgba(0,0,0,0.1)' : '',
-                        border: mode === 'light' ? '1px solid rgba(125,125,125, 0.5)' : '',
-                        '& .MuiDataGrid-cell': {
-                            textAlign: 'center'                            
+                        border: '1px solid rgba(0, 0, 0, .125)',
+                        '&:not(:last-child)': {
+                            borderBottom: 0,
                         },
-                        '& .MuiDataGrid-columnHeaders': {
-                            backgroundColor: mode === 'light' ? '#f5f5f5' : '#444',
-                            color: mode === 'light' ? '#333' : '#fff',                      
-                        }                        
-                    },
-                },
+                        '&::before': {
+                            display: 'none',
+                        },
+                    }
+                }
             },
-        }
+            MuiAccordionSummary: {
+                styleOverrides: {
+                    root: {
+                        backgroundColor: 'rgba(0, 0, 0, .03)',
+                        flexDirection: 'row-reverse',
+                        '& .MuiAccordionSummary-expandIconWrapper.Mui-expanded': {
+                            transform: 'rotate(90deg)',
+                        },
+                        '& .MuiAccordionSummary-content': {
+                            marginLeft: "10px",
+                        },
+                    }
+                }
+            },
+            MuiAccordionDetails: {
+                styleOverrides: {
+                    root: {
+                        backgroundColor: 'rgba(0, 0, 0, .02)',
+                        padding: '16px',
+                        borderTop: '1px solid rgba(0, 0, 0, .125)',
+                    }
+                }
+            },                     
+        },
     }), [mode]);
 
     const toggleTheme = () => {

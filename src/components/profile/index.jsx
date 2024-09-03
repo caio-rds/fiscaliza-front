@@ -5,6 +5,7 @@ import Divider from "@mui/material/Divider";
 import Stack from "@mui/material/Stack";
 import MapUser from "../userMap";
 import axios from "axios";
+import useAuthContext from "../../hooks/useAuthContext";
 
 const serverURL = import.meta.env.VITE_SERVER_URL;
 
@@ -24,7 +25,7 @@ const style = {
 };
 
 export default function MyProfile() {
-  const [user, setUser] = useState({
+  const [userPayload, setUser] = useState({
     username: "0",
     email: "0",
     phone: "0",
@@ -42,11 +43,12 @@ export default function MyProfile() {
   const [userEditing, setuserEditing] = useState(false);
   const [addressEditing, setAddressEditing] = useState(false);
   const [mapShow, setMapShow] = useState(false); 
+  const { user } = useAuthContext();
   
   useEffect(() => {    
     const fetchData = async () => {
       try {
-        const response = await axios.get(`${serverURL}user/caiords`, {
+        const response = await axios.get(`${serverURL}user/${user.username}`, {
           headers: {
             'Content-Type': 'application/json, charset=utf-8',
             "ngrok-skip-browser-warning": true,
@@ -71,17 +73,17 @@ export default function MyProfile() {
       <Box className={"flexColumn"} rowGap={"20px"}>
         <Box className={"flexColumn"} rowGap={"10px"}>
           <Avatar sx={{ width: "220px", height: "220px" }} />
-          <Typography variant={"h4"}>{user.username}</Typography>
+          <Typography variant={"h4"}>{userPayload.username}</Typography>
         </Box>
         <Box className={"flexColumn"} rowGap={"10px"}>
-          {Object.keys(user).map(
+          {Object.keys(userPayload).map(
             (key, index) =>
               key !== "username" && key !="reports" && key !="address" && (
                 <TextField
 					key={index}
 					label={key}
 					name={key}
-					value={user[key]}
+					value={userPayload[key]}
 					// onChange={handleChange}
 					variant="outlined"
 					InputProps={{
@@ -114,17 +116,17 @@ export default function MyProfile() {
                 Endereço
               </Typography>
               {
-                user.address === null ? (
+                userPayload.address === null ? (
                   <Typography gutterBottom variant="body2" component="div" textAlign="left">
                     Nenhum endereço cadastrado
                   </Typography>
                 ) : (
                   <>
                     <Typography gutterBottom variant="h5" component="div" textAlign="left">
-                      {user.address.street}, {user.address.number}
+                      {userPayload.address.street}, {userPayload.address.number}
                     </Typography>
                     <Typography gutterBottom variant="body2" component="div" textAlign="left">
-                      {user.address.district}, {user.address.city} - {user.address.state}
+                      {userPayload.address.district}, {userPayload.address.city} - {userPayload.address.state}
                     </Typography>
                   </>
 
@@ -149,13 +151,13 @@ export default function MyProfile() {
 				Total de Reports
 				</Typography>
 				<Typography gutterBottom variant="h4" component="div">
-				{user.reports.length}
+				{userPayload.reports.length}
 				</Typography>
 			</Stack>
 			{
-				user.reports.lenght > 0 ? (					
+				userPayload.reports.lenght > 0 ? (					
 					<Typography color="text.secondary" variant="body2">
-						Último report: {user.reports[0].Description}
+						Último report: {userPayload.reports[0].Description}
 					</Typography>		
 				) : (
 					<Typography color="text.secondary" variant="body2">
@@ -180,7 +182,7 @@ export default function MyProfile() {
               Membro desde
             </Typography>
             <Typography gutterBottom variant="body2" component="div">
-              {new Date(user.createdAt).getDate() + "/" + new Date(user.createdAt).getMonth() + "/" + new Date(user.createdAt).getFullYear()}
+              {new Date(userPayload.createdAt).getDate() + "/" + new Date(userPayload.createdAt).getMonth() + "/" + new Date(userPayload.createdAt).getFullYear()}
             </Typography>
           </Stack>
         </Box> 
@@ -196,7 +198,7 @@ export default function MyProfile() {
           <TextField
             label="Street"
             name="street"
-            value={ user.address !== null ? user.address.street : ""}
+            value={ userPayload.address !== null ? userPayload.address.street : ""}
             //onChange={handleChange}
             variant="outlined"
             fullWidth
@@ -205,7 +207,7 @@ export default function MyProfile() {
           <TextField
             label="Number"
             name="number"
-            value={ user.address !== null ? user.address.number : ""}
+            value={ userPayload.address !== null ? userPayload.address.number : ""}
             //onChange={handleChange}
             variant="outlined"
             fullWidth
@@ -214,7 +216,7 @@ export default function MyProfile() {
           <TextField
             label="District"
             name="district"
-            value={ user.address !== null ? user.address.district : ""}
+            value={ userPayload.address !== null ? userPayload.address.district : ""}
             //onChange={handleChange}
             variant="outlined"
             fullWidth
@@ -223,7 +225,7 @@ export default function MyProfile() {
           <TextField
             label="City"
             name="city"
-            value={ user.address !== null ? user.address.city : ""}
+            value={ userPayload.address !== null ? userPayload.address.city : ""}
             //onChange={handleChange}
             variant="outlined"
             fullWidth
@@ -232,7 +234,7 @@ export default function MyProfile() {
           <TextField
             label="State"
             name="state"
-            value={ user.address !== null ? user.address.state : ""}
+            value={ userPayload.address !== null ? userPayload.address.state : ""}
             //onChange={handleChange}
             variant="outlined"
             fullWidth
@@ -251,8 +253,8 @@ export default function MyProfile() {
 	<Modal open={mapShow} onClose={() => setMapShow(false)}>
 		<Box sx={style}>
       { 
-      user.address !== null ? (
-      <MapUser lat={parseFloat(user.address.lat)} lon={parseFloat(user.address.lon)} />
+      userPayload.address !== null ? (
+      <MapUser lat={parseFloat(userPayload.address.lat)} lon={parseFloat(userPayload.address.lon)} />
       ) : (
         <Typography variant="h6" gutterBottom>
           Nenhum endereço cadastrado

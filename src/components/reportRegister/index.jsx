@@ -1,6 +1,5 @@
 import { Box, FormControl, MenuItem, Select, Button, InputLabel, TextField, FormLabel, RadioGroup, FormControlLabel, Radio, Autocomplete, Typography, Alert } from "@mui/material";
 // import { sub } from "date-fns";
-import { bool } from "prop-types";
 import { useCallback, useEffect, useState, useRef } from "react"
 import useAxios from "../../utils/axiosConfig"
 import Snackbar2 from '@mui/material/Snackbar';
@@ -29,16 +28,18 @@ export default function ReportRegister() {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude;
-          const lon = position.coords.longitude;
+          const lon = position.coords.longitude;          
           const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
           fetch(url)
             .then(response => {
+              console.log(lat, lon);
               if (!response.ok) {
                 throw new Error('Network response was not ok ' + response.statusText);
               }        
               return response.json();
             })
             .then(data => {
+              console.log(data.address);
               setStreet(data.address.road);
               setDistrict(data.address.suburb);
               setLatitude(lat);
@@ -62,8 +63,6 @@ export default function ReportRegister() {
       setError('Geolocalização não é suportada pelo seu navegador.');
     }
   }
-
-
 
   useEffect(() => {
     const fetchTypes = async () => {
@@ -116,7 +115,7 @@ export default function ReportRegister() {
         data.map((address) => result.push({
           id: address.place_id,
           street: address.address.road + (resultNumber ? ", " + resultNumber : ""),
-          suburb: address.address.suburb,
+          district: address.address.suburb,
           lat: address.lat,
           lon: address.lon
         }));
@@ -130,15 +129,14 @@ export default function ReportRegister() {
 
   const handleSearchDebounce = useDebounce(handleSearchAddress, 500);
 
-  const renderOption = (props, option) => {        
+  const renderOption = (props, option) => {
     return (                    
       <li key={option.id} {...props} className={"flexColumn"} style={{alignItems: 'flex-start', paddingLeft: '20px'}}>
         <Typography variant="subtitle1">{option.street}</Typography>
-        <Typography variant="caption">{option.suburb}, Rio de Janeiro</Typography>
+        <Typography variant="caption">{option.district}, Rio de Janeiro</Typography>
       </li>      
     );
   };
-
 
   const submitReport = async () => {
     try {
@@ -204,10 +202,10 @@ export default function ReportRegister() {
           <FormLabel id="anonymous-report-label" sx={{marginLeft: '2px'}}>Relato Anônimo</FormLabel>
           <RadioGroup
             aria-labelledby="anonymous-report-label"
-            defaultValue="false"
+            defaultValue={anonymousReport}
             name="radio-buttons-group"
             sx={{ display: 'flex', flexDirection: 'row', padding: '10px' }}
-            onChange={(event) => setAnonymousReport(bool(event.target.value))}
+            onChange={() => setAnonymousReport(!anonymousReport)}
           >
               <FormControlLabel value="false" control={<Radio />} label="Sim" /> 
               <FormControlLabel value="true" control={<Radio />} label="Não" />
@@ -221,12 +219,12 @@ export default function ReportRegister() {
             id="street"
             noOptionsText="Nenhum endereço encontrado"
             options={suggestedAddresses}
+            value={suggestedAddresses.find((option) => option.street === street)}
             inputValue={street}
             sx={{ width: '100%' }}         
             getOptionLabel={(option) => option.street}
             renderOption={renderOption}
-            onInput={handleSearchDebounce}
-            onInputChange={(event, value) => setStreet(value)}
+            onInputChange={(e) => {e.target.value ? setStreet(e.target.value) : "", handleSearchDebounce(e)}}
             renderInput={(params) => <TextField {...params} label="Endereço" />}
             onChange={(event, value) => {
               if (value) {

@@ -7,8 +7,7 @@ import HomeIcon from "@mui/icons-material/Home";
 import ReportIcon from "@mui/icons-material/Report";
 import AddBoxIcon from "@mui/icons-material/AddBox";
 import SearchIcon from "@mui/icons-material/Search";
-import Person from "@mui/icons-material/Person";
-import DisabledByDefaultIcon from '@mui/icons-material/DisabledByDefault';
+import Info from "@mui/icons-material/Info";
 import useAuthContext from "../../hooks/useAuthContext";
 
 
@@ -19,8 +18,8 @@ const urls = [
   { name: "Reports", url: "/reports", icon: <ReportIcon />, user: true },
   { name: "Criar Report", url: "/reports/new", icon: <AddBoxIcon />, user: true },  
   { name: "Procurar Report", url: "/reports/search", icon: <SearchIcon />, user: true },
-  { name: "Profile", url: "/profile", icon: <Person />, user: true},
-  { name: "Deslogar", url: "/sair", icon: <DisabledByDefaultIcon />, user: true },
+
+  { name: "Sobre Nós", url: "/about", icon: <Info />, user: false },
 ];
 
 

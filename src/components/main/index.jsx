@@ -10,7 +10,7 @@ export default function Main({ children }) {
       sx={{
         width: "100%",
         height: "100vh",
-        background: mode === "light" ? "#fff" : "#333",        
+        background: mode === "light" ? "#CDCDCD" : "#19181D",        
         
       }}
       className={"flexColumn"}

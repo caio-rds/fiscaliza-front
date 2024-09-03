@@ -1,5 +1,5 @@
 import { Box, Typography, Button } from "@mui/material";
-import DisplayReports from "../report";
+import DisplayReports from "../reportsCard";
 import MapReport from "../map";
 import { useState, useEffect } from "react";
 import Modal from "@mui/material/Modal";

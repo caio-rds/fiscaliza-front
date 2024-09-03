@@ -64,9 +64,7 @@ export default function Login() {
           sx={{
             width: "100%",
             height: "50px",
-            marginTop: "40px",
-            background: "var(--secondary-color)",
-            color: "#333",
+            marginTop: "40px",             
           }}
           variant="contained"
           color="primary"

@@ -63,7 +63,7 @@ const AuthProvider = ({ children }) => {
   const logout = () => {
     localStorage.removeItem('token');
     setUser(null);
-    history.push('/login');
+    window.location.href = '/';
   };
 
   return (
