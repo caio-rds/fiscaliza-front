@@ -4,7 +4,6 @@ import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import PropTypes from "prop-types";
 
-// Defina o estilo do container do mapa
 const containerStyle = {
   width: "100%",
   height: "650px",
@@ -23,30 +22,28 @@ L.Icon.Default.mergeOptions({
 });
 
 export default function MapUser({ lat, lon }) {
-  // Converta as strings para floats
   return (
     <Box
       display={"flex"}
       justifyContent={"center"}
-      alignItems={"center"}      
-      maxHeight={"100%"}      
+      alignItems={"center"}
+      maxHeight={"100%"}
     >
       <MapContainer
         center={[lat, lon]}
         zoom={15}
         style={containerStyle}
         scrollWheelZoom={true}
-        dragging={false}            
+        dragging={false}
       >
         <TileLayer
           attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
-        
-        <Marker style={{transform: 'scale(1.0)'}} position={[lat, lon]}>
+
+        <Marker style={{ transform: "scale(1.0)" }} position={[lat, lon]}>
           <Popup>Seu Endereço</Popup>
         </Marker>
-        
       </MapContainer>
     </Box>
   );

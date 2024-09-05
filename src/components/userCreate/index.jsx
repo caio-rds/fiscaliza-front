@@ -1,6 +1,14 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import {
+  Box,
+  Button,
+  TextField,
+  Typography,
+  IconButton,
+  InputAdornment,
+} from "@mui/material";
 import { useState } from "react";
-
+import InputMask from "react-input-mask";
+import { Visibility, VisibilityOff } from "@mui/icons-material";
 
 export default function RegisterUser() {
   const [user, setUser] = useState({
@@ -12,15 +20,66 @@ export default function RegisterUser() {
     confirmPassword: "",
   });
 
-  const submit = () => {
-    console.log(user);
-  }
+  const [errors, setErrors] = useState({});
+  const [showPassword, setShowPassword] = useState(false);
 
+  const validatePassword = (password) => {
+    const passwordRegex =
+      /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
+    if (!passwordRegex.test(password)) {
+      return "A senha deve ter no mínimo 8 caracteres, incluindo pelo menos uma letra maiúscula, uma minúscula, um número e um caractere especial";
+    }
+    return "";
+  };
+
+  const handleClickShowPassword = () => {
+    setShowPassword(!showPassword);
+  };
+
+  const submit = () => {
+    const newErrors = {};
+
+    if (!user.username) newErrors.username = "Usuário é obrigatório";
+    if (!user.name) newErrors.name = "Nome completo é obrigatório";
+    if (!user.email) newErrors.email = "Email é obrigatório";
+    if (!user.phone) newErrors.phone = "Telefone é obrigatório";
+
+    if (!user.password) {
+      newErrors.password = "Senha é obrigatória";
+    } else {
+      const passwordError = validatePassword(user.password);
+      if (passwordError) newErrors.password = passwordError;
+    }
+
+    if (!user.confirmPassword) {
+      newErrors.confirmPassword = "Confirmar senha é obrigatório";
+    } else if (user.password !== user.confirmPassword) {
+      newErrors.confirmPassword = "As senhas não coincidem";
+    }
+
+    setErrors(newErrors);
+
+    if (Object.keys(newErrors).length === 0) {
+      console.log(user);
+    }
+  };
 
   return (
-    <Box sx={{ height: "100%" }} className={"flexRow"} alignItems={"flex-start"} columnGap={"100px"}>
-      <Box sx={{ width: "300px" }} className={"flexColumn"} rowGap={"10px"}>        
-        <Typography variant={"h5"} sx={{padding: '30px'}}>Cadastre-se</Typography>        
+    <Box
+      sx={{ height: "100%" }}
+      className={"flexRow"}
+      alignItems={"flex-start"}
+      columnGap={"100px"}
+    >
+      <Box
+        sx={{ width: "300px" }}
+        className={"flexColumn"}
+        rowGap={"10px"}
+        as="form"
+      >
+        <Typography variant={"h5"} sx={{ padding: "30px" }}>
+          Cadastre-se
+        </Typography>
 
         <TextField
           sx={{ width: "100%" }}
@@ -28,59 +87,100 @@ export default function RegisterUser() {
           value={user.username}
           placeholder="johndoe"
           variant="outlined"
+          error={!!errors.username}
+          helperText={errors.username}
           onChange={(e) => setUser({ ...user, username: e.target.value })}
         />
+
         <TextField
           sx={{ width: "100%" }}
           label="Nome Completo"
           value={user.name}
           placeholder="John Doe"
           variant="outlined"
+          error={!!errors.name}
+          helperText={errors.name}
           onChange={(e) => setUser({ ...user, name: e.target.value })}
         />
+
         <TextField
           sx={{ width: "100%" }}
           label="Email"
           value={user.email}
           placeholder="john_doe@email.com"
           variant="outlined"
+          error={!!errors.email}
+          helperText={errors.email}
           onChange={(e) => setUser({ ...user, email: e.target.value })}
         />
-        <TextField
-          sx={{ width: "100%" }}
-          label="Telefone"
+
+        <InputMask
+          mask="(99) 99999-9999"
           value={user.phone}
-          placeholder="(99) 99999-9999"
-          variant="outlined"
-        />
+          onChange={(e) => setUser({ ...user, phone: e.target.value })}
+        >
+          {(inputProps) => (
+            <TextField
+              {...inputProps}
+              sx={{ width: "100%" }}
+              label="Telefone"
+              placeholder="(99) 99999-9999"
+              variant="outlined"
+              error={!!errors.phone}
+              helperText={errors.phone}
+            />
+          )}
+        </InputMask>
+
         <TextField
           sx={{ width: "100%" }}
           label="Senha"
           value={user.password}
           variant="outlined"
-          type="password"
+          type={showPassword ? "text" : "password"}
+          error={!!errors.password}
+          helperText={errors.password}
           onChange={(e) => setUser({ ...user, password: e.target.value })}
+          InputProps={{
+            endAdornment: (
+              <InputAdornment position="end">
+                <IconButton
+                  aria-label="toggle password visibility"
+                  onClick={handleClickShowPassword}
+                  edge="end"
+                >
+                  {showPassword ? <VisibilityOff /> : <Visibility />}
+                </IconButton>
+              </InputAdornment>
+            ),
+          }}
         />
+
         <TextField
           sx={{ width: "100%" }}
           label="Confirmar Senha"
           value={user.confirmPassword}
           variant="outlined"
-          type="password"
-          onChange={(e) => setUser({ ...user, confirmPassword: e.target.value })}
+          type={showPassword ? "text" : "password"}
+          error={!!errors.confirmPassword}
+          helperText={errors.confirmPassword}
+          onChange={(e) =>
+            setUser({ ...user, confirmPassword: e.target.value })
+          }
         />
 
         <Button
           sx={{
             width: "100%",
             height: "50px",
-            marginTop: "40px",                        
+            marginTop: "40px",
           }}
           onClick={() => submit()}
-          variant="contained"          
+          variant="contained"
         >
           Entrar
         </Button>
+
         <Typography
           variant={"body2"}
           width={"100%"}
