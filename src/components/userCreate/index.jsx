@@ -26,6 +26,16 @@ export default function RegisterUser() {
   const [errors, setErrors] = useState({});
   const [showPassword, setShowPassword] = useState(false);
 
+  const validateEmail = (email) => {
+    const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+    if (!email) {
+      return "Email é obrigatório";
+    } else if (!emailRegex.test(email)) {
+      return "Email inválido";
+    }
+    return "";
+  };
+
   const validatePassword = (password) => {
     const passwordRegex =
       /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-Za-z\d@$!%*?&]{8,}$/;
@@ -44,7 +54,10 @@ export default function RegisterUser() {
 
     if (!user.username) newErrors.username = "Usuário é obrigatório";
     if (!user.name) newErrors.name = "Nome completo é obrigatório";
-    if (!user.email) newErrors.email = "Email é obrigatório";
+
+    const emailError = validateEmail(user.email);
+    if (emailError) newErrors.email = emailError;
+
     if (!user.phone) newErrors.phone = "Telefone é obrigatório";
 
     if (!user.password) {
@@ -66,8 +79,8 @@ export default function RegisterUser() {
       try {
         const response = await axios.post(serverURL + "user/", user, {
           headers: {
-            'Content-Type': 'application/json',
-          }
+            "Content-Type": "application/json",
+          },
         });
         console.log(response.data);
         alert("Cadastro realizado com sucesso!");
