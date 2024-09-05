@@ -9,6 +9,9 @@ import {
 import { useState } from "react";
 import InputMask from "react-input-mask";
 import { Visibility, VisibilityOff } from "@mui/icons-material";
+import axios from "axios";
+
+const serverURL = import.meta.env.VITE_SERVER_URL;
 
 export default function RegisterUser() {
   const [user, setUser] = useState({
@@ -36,7 +39,7 @@ export default function RegisterUser() {
     setShowPassword(!showPassword);
   };
 
-  const submit = () => {
+  const submit = async () => {
     const newErrors = {};
 
     if (!user.username) newErrors.username = "Usuário é obrigatório";
@@ -60,7 +63,18 @@ export default function RegisterUser() {
     setErrors(newErrors);
 
     if (Object.keys(newErrors).length === 0) {
-      console.log(user);
+      try {
+        const response = await axios.post(serverURL + "user/", user, {
+          headers: {
+            'Content-Type': 'application/json',
+          }
+        });
+        console.log(response.data);
+        alert("Cadastro realizado com sucesso!");
+      } catch (error) {
+        console.error("Erro ao cadastrar:", error);
+        alert("Erro ao cadastrar. Tente novamente.");
+      }
     }
   };
 
