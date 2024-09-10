@@ -6,11 +6,10 @@ import { useState } from "react";
 import useAuthContext from "../../hooks/useAuthContext";
 
 export default function Login() {
-  const { mode } = useThemeContext();      
+  const { tryLogin } = useAuthContext();
+  const { mode } = useThemeContext();
   const [user, setUser] = useState("");
   const [password, setPassword] = useState("");
-  const { tryLogin } = useAuthContext();
-
 
   const defaultOptions = {
     loop: true,
@@ -24,10 +23,10 @@ export default function Login() {
   const handleLogin = async (event) => {
     event.preventDefault();
     const formData = new FormData();
-    formData.append('username', user);
-    formData.append('password', password);
+    formData.append("username", user);
+    formData.append("password", password);
     tryLogin(formData).then();
-  }
+  };
 
   return (
     <Box sx={{ height: "100%" }} className={"flexRow"} columnGap={"100px"}>
@@ -51,7 +50,12 @@ export default function Login() {
           />
           <Typography variant={"h5"}>Login Fiscaliza</Typography>
         </Box>
-        <TextField sx={{ width: "100%" }} label="Usuário" variant="outlined" onChange={(e) => setUser(e.target.value)} />
+        <TextField
+          sx={{ width: "100%" }}
+          label="Usuário"
+          variant="outlined"
+          onChange={(e) => setUser(e.target.value)}
+        />
         <TextField
           sx={{ width: "100%" }}
           label="Senha"
@@ -64,7 +68,7 @@ export default function Login() {
           sx={{
             width: "100%",
             height: "50px",
-            marginTop: "40px",             
+            marginTop: "40px",
           }}
           variant="contained"
           color="primary"

@@ -1,248 +1,316 @@
-import { Box, FormControl, MenuItem, Select, Button, InputLabel, TextField, FormLabel, RadioGroup, FormControlLabel, Radio, Autocomplete, Typography, Alert } from "@mui/material";
-// import { sub } from "date-fns";
-import { useCallback, useEffect, useState, useRef } from "react"
-import useAxios from "../../utils/axiosConfig"
-import Snackbar2 from '@mui/material/Snackbar';
-import LocationOnIcon from '@mui/icons-material/LocationOn';
-import MapIcon from '@mui/icons-material/Map';
-
-
+import {
+  Box,
+  FormControl,
+  MenuItem,
+  Select,
+  Button,
+  InputLabel,
+  TextField,
+  FormLabel,
+  RadioGroup,
+  FormControlLabel,
+  Radio,
+  Autocomplete,
+  Typography,
+  Alert,
+  Snackbar,
+} from "@mui/material";
+import { useCallback, useEffect, useState, useRef } from "react";
+import useAxios from "../../utils/axiosConfig";
+import LocationOnIcon from "@mui/icons-material/LocationOn";
+import MapIcon from "@mui/icons-material/Map";
 
 export default function ReportRegister() {
-  const [typeReports, setTypeReports] = useState([]);
-  const [typeReport, setTypeReport] = useState("");
-  const [description, setDescription] = useState("");
-  const [anonymousReport, setAnonymousReport] = useState(false);
-  const [street, setStreet] = useState("");  
-  const [district, setDistrict] = useState("");
-  const [latitude, setLatitude] = useState("");
-  const [longitude, setLongitude] = useState("");
-  const [suggestedAddresses, setSuggestedAddresses] = useState([]);
   const axiosInstance = useAxios();
-  const [error, setError] = useState(null);
-  const [success, setSuccess] = useState(null);
+  const [formData, setFormData] = useState({
+    typeReport: "",
+    description: "",
+    anonymousReport: false,
+    street: "",
+    district: "",
+    latitude: "",
+    longitude: "",
+  });
+  const [typeReports, setTypeReports] = useState([]);
+  const [suggestedAddresses, setSuggestedAddresses] = useState([]);
+  const [alert, setAlert] = useState({ message: null, type: null });
   const [openSnack, setOpenSnack] = useState(false);
+
+  const updateField = (name, value) => {
+    setFormData((prev) => ({ ...prev, [name]: value }));
+  };
 
   const userLocation = () => {
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
         (position) => {
           const lat = position.coords.latitude;
-          const lon = position.coords.longitude;          
-          const url = `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`;
-          fetch(url)
-            .then(response => {
-              console.log(lat, lon);
-              if (!response.ok) {
-                throw new Error('Network response was not ok ' + response.statusText);
-              }        
-              return response.json();
-            })
-            .then(data => {
+          const lon = position.coords.longitude;
+          fetch(
+            `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`
+          )
+            .then((res) => res.json())
+            .then((data) => {
               console.log(data.address);
-              setStreet(data.address.road);
-              setDistrict(data.address.suburb);
-              setLatitude(lat);
-              setLongitude(lon);
+              updateField("street", data.address.road || "");
+              updateField("district", data.address.suburb || "");
+              updateField("latitude", lat);
+              updateField("longitude", lon);
             })
-            .catch(error => {        
-              console.error('Houve um problema com a requisição fetch:', error);
-            });
+            .catch((error) =>
+              setAlert({ message: error.message, type: "error" })
+            );
         },
-        (error) => {
-          console.error('Erro ao obter a localização:', error);
-          setError('Não foi possível obter a localização. Por favor, verifique as permissões e tente novamente.');
-        },
-        {
-          enableHighAccuracy: true,
-          timeout: 10000,
-          maximumAge: 0
-        }
+        () => setAlert({ message: "Erro ao obter localização", type: "error" }),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
       );
     } else {
-      setError('Geolocalização não é suportada pelo seu navegador.');
+      setAlert({ message: "Geolocalização não suportada", type: "error" });
     }
-  }
+  };
 
   useEffect(() => {
     const fetchTypes = async () => {
-      const request = await axiosInstance.get('/report/types');
-      setTypeReports(request.data);
-    }
-    if (typeReports.length === 0) {
-      fetchTypes();
-    }    
-  },[axiosInstance, typeReports]);
+      try {
+        const { data } = await axiosInstance.get("/report/types");
+        setTypeReports(data);
+      } catch (error) {
+        setAlert({
+          message: "Erro ao carregar tipos de ocorrências",
+          type: "error",
+        });
+      }
+    };
+
+    if (!typeReports.length) fetchTypes();
+  }, [axiosInstance, typeReports]);
 
   const useDebounce = (func, delay) => {
-    const inDebounce = useRef();
-  
-    const debounce = useCallback(
-      function () {
-        const context = this;
-        const args = arguments;
-        clearTimeout(inDebounce.current);
-        inDebounce.current = setTimeout(() => func.apply(context, args), delay);
+    const debounceRef = useRef();
+
+    return useCallback(
+      (...args) => {
+        clearTimeout(debounceRef.current);
+        debounceRef.current = setTimeout(() => func(...args), delay);
       },
       [func, delay]
     );
-  
-    return debounce;
   };
 
-  const handleSearchAddress = (event) => {
-    if (event.target.value.length < 3) {
-      return;
-    }
-
+  const handleSearchAddress = async (event) => {
     const query = event.target.value;
-    const url = `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(query)}&city=Rio+de+Janeiro&limit=5&addressdetails=1`;
-    
-    fetch(url)
-      .then(response => {
-        if (!response.ok) {
-          throw new Error('Network response was not ok ' + response.statusText);
-        }        
-        return response.json();
-      })
-      .then(data => {
-        let result = [];        
-        const number = query.match(/\d+/g);
-        let resultNumber = "";
-        if (number) {
-          resultNumber = number[0];
-        }
-        data.map((address) => result.push({
-          id: address.place_id,
-          street: address.address.road + (resultNumber ? ", " + resultNumber : ""),
-          district: address.address.suburb,
-          lat: address.lat,
-          lon: address.lon
-        }));
-        setSuggestedAddresses(result);
+    if (query.length < 3) return;
 
-      })
-      .catch(error => {        
-        console.error('Houve um problema com a requisição fetch:', error);
-      });
-  }
+    if (navigator.geolocation) {
+      navigator.geolocation.getCurrentPosition(
+        async (position) => {
+          try {
+            const lat = position.coords.latitude;
+            const lon = position.coords.longitude;
 
-  const handleSearchDebounce = useDebounce(handleSearchAddress, 500);
+            const reverseGeoResponse = await fetch(
+              `https://nominatim.openstreetmap.org/reverse?format=json&lat=${lat}&lon=${lon}&addressdetails=1`
+            );
+            const reverseGeoData = await reverseGeoResponse.json();
 
-  const renderOption = (props, option) => {
-    return (                    
-      <li key={option.id} {...props} className={"flexColumn"} style={{alignItems: 'flex-start', paddingLeft: '20px'}}>
-        <Typography variant="subtitle1">{option.street}</Typography>
-        <Typography variant="caption">{option.district}, Rio de Janeiro</Typography>
-      </li>      
-    );
+            const state = reverseGeoData?.address?.state;
+            if (!state) {
+              throw new Error("Não foi possível determinar o estado.");
+            }
+
+            const searchResponse = await fetch(
+              `https://nominatim.openstreetmap.org/search?format=json&street=${encodeURIComponent(
+                query
+              )}&state=${encodeURIComponent(state)}&limit=5&addressdetails=1`
+            );
+            const searchData = await searchResponse.json();
+
+            console.log(searchData);
+
+            setSuggestedAddresses(
+              searchData.map((addr) => ({
+                id: addr.place_id,
+                street: `${addr.name || ""}, ${
+                  addr.address.city || addr.address.city_district || ""
+                }.`,
+                district: addr.address.suburb || "",
+                lat: addr.lat,
+                lon: addr.lon,
+              }))
+            );
+          } catch (error) {
+            setAlert({ message: error.message, type: "error" });
+          }
+        },
+        () =>
+          setAlert({
+            message: "Erro ao obter localização",
+            type: "error",
+          }),
+        { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+      );
+    } else {
+      setAlert({ message: "Geolocalização não suportada", type: "error" });
+    }
   };
+
+  const handleSearchDebounce = useDebounce(handleSearchAddress, 200);
 
   const submitReport = async () => {
-    try {
-      let payload = {
-        anonymous: anonymousReport ? 1 : 0,
-        description: description,
-        type: typeReport,
-        street: street,
-        district: district,
-        lat: latitude,
-        lon: longitude
-      };
-      Object.keys(payload).forEach(key => payload[key] === "" || payload[key] === null || payload[key] === undefined ? setError('Preencha todos os campos.') && setOpenSnack(true) : null);
-      const response = await axiosInstance.post('/report/', payload);
-      setSuccess('Ocorrência registrada com sucesso.');
-      console.log(response.data);
-    } catch (error) {
-      console.error('There was an error with the request:', error);
-    }
-  };
+    const {
+      typeReport,
+      description,
+      anonymousReport,
+      street,
+      district,
+      latitude,
+      longitude,
+    } = formData;
 
-  const handleClose = (event, reason) => {
-    if (reason === 'clickaway') {
+    if (
+      !typeReport ||
+      !description ||
+      !street ||
+      !district ||
+      !latitude ||
+      !longitude
+    ) {
+      setAlert({ message: "Preencha todos os campos", type: "error" });
+      setOpenSnack(true);
       return;
     }
-    setOpenSnack(false);
+
+    try {
+      const payload = {
+        type: typeReport,
+        description,
+        anonymous: anonymousReport ? 1 : 0,
+        street,
+        district,
+        lat: latitude,
+        lon: longitude,
+      };
+      await axiosInstance.post("/report/", payload);
+      setAlert({
+        message: "Ocorrência registrada com sucesso",
+        type: "success",
+      });
+    } catch (error) {
+      setAlert({ message: "Erro ao enviar ocorrência", type: "error" });
+    }
+    setOpenSnack(true);
   };
 
-  return (    
-    <Box sx={{ width: '100%',marginTop: '60px'}} className={'flexColumn'}>      
-      <Snackbar2 open={openSnack} autoHideDuration={6000} onClose={handleClose} anchorOrigin={{ vertical: 'top', horizontal: 'center' }}>
-        <div>
-          {error && <Alert onClose={handleClose} severity="error" variant="filled">{error}</Alert>}
-          {success && <Alert onClose={handleClose} severity="success" variant="filled">{success}</Alert>}
-        </div>
-      </Snackbar2>
-      <Box sx={{width: {xs: '90%', md: '30%'}, display: 'flex', flexDirection: 'column', rowGap: '10px'}}>
-        <FormControl sx={{ display: 'flex', rowGap: '10px', flexDirection: 'column' }}>
-          <InputLabel id="type-report-label" htmlFor="type-report-label">Tipo de Ocorrência</InputLabel>
+  return (
+    <Box sx={{ width: "100%", marginTop: "60px" }} className={"flexColumn"}>
+      <Snackbar
+        open={openSnack}
+        autoHideDuration={6000}
+        onClose={() => setOpenSnack(false)}
+        anchorOrigin={{ vertical: "top", horizontal: "center" }}
+      >
+        {alert.message && (
+          <Alert severity={alert.type} variant="filled">
+            {alert.message}
+          </Alert>
+        )}
+      </Snackbar>
+
+      <Box
+        sx={{
+          width: { xs: "90%", md: "30%" },
+          display: "flex",
+          flexDirection: "column",
+          rowGap: "10px",
+        }}
+      >
+        <FormControl>
+          <InputLabel>Tipo de Ocorrência</InputLabel>
           <Select
-            labelId="type-report-label"
-            id="type-report"
-            value={typeReport}
-            label="Tipo de Ocorrência"
-            onChange={(e) => setTypeReport(e.target.value)}
-          >            
-            {typeReports.sort((a, b) => a.name.localeCompare(b.name)).map((type) => (
-              <MenuItem key={type.id} value={type.id}>{type.name}</MenuItem>
-            ))}
+            value={formData.typeReport}
+            onChange={(e) => updateField("typeReport", e.target.value)}
+          >
+            {typeReports
+              .sort((a, b) => a.name.localeCompare(b.name))
+              .map((type) => (
+                <MenuItem key={type.id} value={type.id}>
+                  {type.name}
+                </MenuItem>
+              ))}
           </Select>
         </FormControl>
+
         <TextField
-          id="textfield-description-report"
           label="Descrição"
           multiline
           rows={4}
           fullWidth
           placeholder="Descreva a ocorrência"
-          value={description}
-          onChange={(event) => setDescription(event.target.value)}
+          value={formData.description}
+          onChange={(e) => updateField("description", e.target.value)}
         />
-        <Box textAlign={'left'} className={'flexRow'} justifyContent={'flex-start'}>
-          <FormLabel id="anonymous-report-label" sx={{marginLeft: '2px'}}>Relato Anônimo</FormLabel>
+
+        <Box textAlign="left" className="flexRow" justifyContent="flex-start">
+          <FormLabel>Relato Anônimo</FormLabel>
           <RadioGroup
-            aria-labelledby="anonymous-report-label"
-            defaultValue={anonymousReport}
-            name="radio-buttons-group"
-            sx={{ display: 'flex', flexDirection: 'row', padding: '10px' }}
-            onChange={() => setAnonymousReport(!anonymousReport)}
+            row
+            value={formData.anonymousReport}
+            onChange={() =>
+              updateField("anonymousReport", !formData.anonymousReport)
+            }
           >
-              <FormControlLabel value="false" control={<Radio />} label="Sim" /> 
-              <FormControlLabel value="true" control={<Radio />} label="Não" />
+            <FormControlLabel value={false} control={<Radio />} label="Sim" />
+            <FormControlLabel value={true} control={<Radio />} label="Não" />
           </RadioGroup>
         </Box>
 
-
-        
-        <Box className={'flexRow'} columnGap={'10px'} sx={{width: '100%', height: "fit-content"}}>
-          <Autocomplete      
-            id="street"
-            noOptionsText="Nenhum endereço encontrado"
+        <Box className="flexRow" columnGap="12px">
+          <Autocomplete
+            sx={{ width: "100%" }}
             options={suggestedAddresses}
-            value={suggestedAddresses.find((option) => option.street === street)}
-            inputValue={street}
-            sx={{ width: '100%' }}         
+            value={suggestedAddresses.find(
+              (option) => option.street === formData.street
+            )}
             getOptionLabel={(option) => option.street}
-            renderOption={renderOption}
-            onInputChange={(e) => {e.target.value ? setStreet(e.target.value) : "", handleSearchDebounce(e)}}
+            noOptionsText="Nenhum endereço encontrado"
+            renderOption={(props, option) => (
+              <li {...props}>
+                <Typography variant="subtitle1">{option.street}</Typography>
+              </li>
+            )}
+            onInputChange={(e) => {
+              updateField("street", e.target.value);
+              handleSearchDebounce(e);
+            }}
             renderInput={(params) => <TextField {...params} label="Endereço" />}
-            onChange={(event, value) => {
+            onChange={(e, value) => {
               if (value) {
-                setStreet(value.street);
-                setDistrict(value.district);
-                setLatitude(value.lat);
-                setLongitude(value.lon);
+                updateField("street", value.street);
+                updateField("district", value.district);
+                updateField("latitude", value.lat);
+                updateField("longitude", value.lon);
               }
             }}
           />
-          <Button onClick={userLocation} variant="contained" sx={{ display: "flex", height: "100%"}}><LocationOnIcon /></Button>
-          <Button variant="contained" sx={{display: "flex", height: "100%"}}><MapIcon /></Button>
-        </Box>          
-        <Box className={'flexRow'} columnGap={'10px'} sx={{width: '100%'}}>
-          <Button onClick={submitReport} variant="contained" color="primary" fullWidth>Enviar</Button>
-          <Button variant="contained" color="secondary" fullWidth>Cancelar</Button>
-        </Box>          
-      </Box>    
-    </Box>    
+
+          <Button onClick={userLocation} variant="contained">
+            <LocationOnIcon />
+          </Button>
+
+          <Button variant="contained">
+            <MapIcon />
+          </Button>
+        </Box>
+
+        <Box className="flexRow" columnGap="10px">
+          <Button onClick={submitReport} variant="contained" fullWidth>
+            Enviar
+          </Button>
+          <Button variant="contained" color="secondary" fullWidth>
+            Cancelar
+          </Button>
+        </Box>
+      </Box>
+    </Box>
   );
 }

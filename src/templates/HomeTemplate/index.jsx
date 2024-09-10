@@ -82,7 +82,7 @@ export function HomeTemplate({ children }) {
               </ListItemButton>
             ) : null
           )}
-          
+
           <ListItem>
             <SwitchButton />
           </ListItem>

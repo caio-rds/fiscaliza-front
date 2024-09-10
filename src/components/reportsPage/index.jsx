@@ -26,18 +26,18 @@ export default function Reports() {
   const [currentReport, setCurrentReport] = useState({});
   const [open, setOpen] = useState(false);
   const handleOpen = () => setOpen(true);
-  const handleClose = () => setOpen(false);  
+  const handleClose = () => setOpen(false);
   const axiosInstance = useAxios();
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axiosInstance.get(serverURL + "report/");
-        
+        const response = await axiosInstance.get(serverURL + "report/all");
+
         setReports(response.data);
         if (response.data.length > 0) {
           setCurrentReport(response.data[0]);
-        }        
+        }
       } catch (error) {
         console.error("Error fetching data:", error);
       }
@@ -47,31 +47,45 @@ export default function Reports() {
 
   return (
     <Box sx={{ marginTop: "30px", filter: open ? "blur(5px)" : {} }}>
-      
-      <Typography variant={"h2"} textAlign={"center"}>Relatórios</Typography>       
-      
-      <Box sx={{ display: "flex", justifyContent: 'center', alignItems: 'center', marginTop: '20px' }}>
-        {
-          reports.length === 0 ? 
-            <Typography variant={"h4"} textAlign={"center"}>Nenhum relatório encontrado</Typography>
-          :
-          ( 
+      <Typography variant={"h2"} textAlign={"center"}>
+        Relatórios
+      </Typography>
+
+      <Box
+        sx={{
+          display: "flex",
+          justifyContent: "center",
+          alignItems: "center",
+          marginTop: "20px",
+        }}
+      >
+        {reports.length === 0 ? (
+          <Typography variant={"h4"} textAlign={"center"}>
+            Nenhum relatório encontrado
+          </Typography>
+        ) : (
           <>
-            <MapReport reports={reports} current_report={{lat: parseFloat(currentReport.lat), lon: parseFloat(currentReport.lon)}} />
+            <MapReport
+              reports={reports}
+              current_report={{
+                lat: parseFloat(currentReport.lat),
+                lon: parseFloat(currentReport.lon),
+              }}
+            />
+
             <DisplayReports
               reports={reports}
               current_report={currentReport}
               set_current_report={setCurrentReport}
-              openModal={handleOpen}           
+              openModal={handleOpen}
             />
-          </>)
-          
-        }
-        
+          </>
+        )}
       </Box>
+
       <Modal
         open={open}
-        onClose={handleClose}        
+        onClose={handleClose}
         aria-labelledby="modal-modal-title"
         aria-describedby="modal-modal-description"
       >
@@ -79,16 +93,21 @@ export default function Reports() {
           <Typography id="modal-modal-title" variant="h4" component="h2">
             {currentReport.type}
           </Typography>
+
           <Typography id="modal-modal-title" variant="h6" component="h2">
             {currentReport.description}
           </Typography>
+
           <Typography id="modal-modal-description" sx={{ mt: 2 }}>
-            {currentReport.street}, {currentReport.district}, {currentReport.city} - {currentReport.state}
+            {currentReport.street}, {currentReport.district},{" "}
+            {currentReport.city} - {currentReport.state}
           </Typography>
+
           <Typography id="modal-modal-details" sx={{ mt: 2 }}>
             {currentReport.created_at} by:{" "}
             {currentReport.anonymous ? "Anônimo" : currentReport.username}
-          </Typography>          
+          </Typography>
+
           <Button variant="contained" onClick={handleClose}>
             Fechar
           </Button>
