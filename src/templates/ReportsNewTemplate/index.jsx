@@ -18,7 +18,9 @@ import {
 import { useCallback, useEffect, useState, useRef } from "react";
 import useAxios from "../../utils/axiosConfig";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-import MapIcon from "@mui/icons-material/Map";
+// import MapIcon from "@mui/icons-material/Map";
+import { useDeviceType } from "../../hooks/useDeviceType";
+import { CreateReportMap } from "../../components/createReportMap";
 
 export default function ReportRegister() {
   const axiosInstance = useAxios();
@@ -35,6 +37,8 @@ export default function ReportRegister() {
   const [suggestedAddresses, setSuggestedAddresses] = useState([]);
   const [alert, setAlert] = useState({ message: null, type: null });
   const [openSnack, setOpenSnack] = useState(false);
+
+  const isMobile = useDeviceType();
 
   const updateField = (name, value) => {
     setFormData((prev) => ({ ...prev, [name]: value }));
@@ -226,9 +230,11 @@ export default function ReportRegister() {
       >
         <FormControl>
           <InputLabel>Tipo de Ocorrência</InputLabel>
+
           <Select
             value={formData.typeReport}
             onChange={(e) => updateField("typeReport", e.target.value)}
+            label="Tipo de Ocorrência"
           >
             {typeReports
               .sort((a, b) => a.name.localeCompare(b.name))
@@ -250,8 +256,16 @@ export default function ReportRegister() {
           onChange={(e) => updateField("description", e.target.value)}
         />
 
-        <Box textAlign="left" className="flexRow" justifyContent="flex-start">
+        <Box
+          textAlign="left"
+          className="flexRow"
+          justifyContent="flex-start"
+          sx={{
+            gap: "16px",
+          }}
+        >
           <FormLabel>Relato Anônimo</FormLabel>
+
           <RadioGroup
             row
             value={formData.anonymousReport}
@@ -293,19 +307,20 @@ export default function ReportRegister() {
             }}
           />
 
-          <Button onClick={userLocation} variant="contained">
-            <LocationOnIcon />
-          </Button>
-
-          <Button variant="contained">
-            <MapIcon />
-          </Button>
+          {isMobile === "mobile" ? (
+            <Button onClick={userLocation} variant="contained">
+              <LocationOnIcon />
+            </Button>
+          ) : (
+            <CreateReportMap />
+          )}
         </Box>
 
         <Box className="flexRow" columnGap="10px">
           <Button onClick={submitReport} variant="contained" fullWidth>
             Enviar
           </Button>
+
           <Button variant="contained" color="secondary" fullWidth>
             Cancelar
           </Button>

@@ -6,7 +6,7 @@ import Login from "./components/login";
 import RegisterUser from "./components/userCreate";
 import RecoveryUser from "./components/recovery";
 import MyProfile from "./components/profile";
-import ReportRegister from "./components/reportRegister";
+import ReportRegister from "./templates/ReportsNewTemplate";
 import SearchReport from "./components/reportSearch";
 import PrivateRoutes from "./routes/PrivateRoutes";
 import UnauthRoutes from "./routes/UnauthRoutes";

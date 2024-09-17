@@ -3,18 +3,14 @@ import { MapContainer, TileLayer, Marker, Popup } from "react-leaflet";
 import "leaflet/dist/leaflet.css";
 import L from "leaflet";
 import PropTypes from "prop-types";
-import { useEffect } from "react";
-import { useState } from "react";
-import { useRef } from "react";
+import { useEffect, useState, useRef } from "react";
 
-// Defina o estilo do container do mapa
 const containerStyle = {
   width: "100%",
-  height: "650px",
+  height: "640px",
   borderRadius: "8px",
-  boxShadow: "5px 5px 10px rgba(0,0,0,0.5)",
+  boxShadow: "4px 4px 10px rgba(0,0,0,0.5)",
 };
-
 
 delete L.Icon.Default.prototype._getIconUrl;
 L.Icon.Default.mergeOptions({
@@ -28,26 +24,23 @@ L.Icon.Default.mergeOptions({
 
 export default function MapReport({ reports, current_report }) {
   const [center, setCenter] = useState(current_report);
-  const [zoom, setZoom] = useState(16); 
+  const [zoom, setZoom] = useState(16);
   const mapRef = useRef();
 
-
-  useEffect(() => {        
+  useEffect(() => {
     if (mapRef.current) {
       mapRef.current.setView([current_report.lat, current_report.lon], 14);
       for (let i = 14; i < 17; i++) {
         setTimeout(() => {
           mapRef.current.flyTo([current_report.lat, current_report.lon], i);
         }, 1000);
-        
-      }    
+      }
       setCenter({ lat: current_report.lat, lon: current_report.lon });
     }
-    if (current_report.lat === 0 && current_report.lon === 0) {      
+    if (current_report.lat === 0 && current_report.lon === 0) {
       setZoom(2);
-    }    
+    }
   }, [current_report]);
-
 
   return (
     <Box
@@ -68,10 +61,12 @@ export default function MapReport({ reports, current_report }) {
           url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
         />
         {reports.map((report) => (
-          <Marker style={{transform: 'scale(1.0)'}} key={report.id} position={[report.lat, report.lon]}>
-            <Popup>
-              {report.description}
-            </Popup>
+          <Marker
+            style={{ transform: "scale(1.0)" }}
+            key={report.id}
+            position={[report.lat, report.lon]}
+          >
+            <Popup>{report.description}</Popup>
           </Marker>
         ))}
       </MapContainer>
