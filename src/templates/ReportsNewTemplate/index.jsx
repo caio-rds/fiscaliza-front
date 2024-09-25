@@ -18,7 +18,6 @@ import {
 import { useCallback, useEffect, useState, useRef } from "react";
 import useAxios from "../../utils/axiosConfig";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
-// import MapIcon from "@mui/icons-material/Map";
 import { useDeviceType } from "../../hooks/useDeviceType";
 import { CreateReportMap } from "../../components/createReportMap";
 
@@ -41,6 +40,7 @@ export default function ReportRegister() {
   const isMobile = useDeviceType();
 
   const updateField = (name, value) => {
+    console.log(name, value);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
@@ -55,7 +55,6 @@ export default function ReportRegister() {
           )
             .then((res) => res.json())
             .then((data) => {
-              console.log(data.address);
               updateField("street", data.address.road || "");
               updateField("district", data.address.suburb || "");
               updateField("latitude", lat);
@@ -128,8 +127,6 @@ export default function ReportRegister() {
               )}&state=${encodeURIComponent(state)}&limit=5&addressdetails=1`
             );
             const searchData = await searchResponse.json();
-
-            console.log(searchData);
 
             setSuggestedAddresses(
               searchData.map((addr) => ({
@@ -282,18 +279,24 @@ export default function ReportRegister() {
           <Autocomplete
             sx={{ width: "100%" }}
             options={suggestedAddresses}
-            value={suggestedAddresses.find(
-              (option) => option.street === formData.street
-            )}
-            getOptionLabel={(option) => option.street}
+            value={
+              formData.street
+                ? { street: formData.street, district: formData.district }
+                : null
+            }
+            getOptionLabel={(option) => `${option.street}, ${option.district}`}
             noOptionsText="Nenhum endereço encontrado"
+            isOptionEqualToValue={(option, value) =>
+              option.street === value.street &&
+              option.district === value.district
+            }
             renderOption={(props, option) => (
               <li {...props}>
-                <Typography variant="subtitle1">{option.street}</Typography>
+                <Typography variant="subtitle1">{`${option.street}, ${option.district}`}</Typography>
               </li>
             )}
-            onInputChange={(e) => {
-              updateField("street", e.target.value);
+            onInputChange={(e, newInputValue) => {
+              updateField("street", newInputValue);
               handleSearchDebounce(e);
             }}
             renderInput={(params) => <TextField {...params} label="Endereço" />}
@@ -312,7 +315,10 @@ export default function ReportRegister() {
               <LocationOnIcon />
             </Button>
           ) : (
-            <CreateReportMap />
+            <CreateReportMap
+              updateField={updateField}
+              updateSuggestedAddresses={setSuggestedAddresses}
+            />
           )}
         </Box>
 
