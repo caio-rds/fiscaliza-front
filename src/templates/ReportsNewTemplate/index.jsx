@@ -15,11 +15,12 @@ import {
   Alert,
   Snackbar,
 } from "@mui/material";
-import { useCallback, useEffect, useState, useRef } from "react";
+import { useEffect, useState } from "react";
 import useAxios from "../../utils/axiosConfig";
 import LocationOnIcon from "@mui/icons-material/LocationOn";
 import { useDeviceType } from "../../hooks/useDeviceType";
 import { CreateReportMap } from "../../components/createReportMap";
+import useDebounce from "../../hooks/useDebounce";
 
 export default function ReportRegister() {
   const axiosInstance = useAxios();
@@ -32,6 +33,10 @@ export default function ReportRegister() {
     latitude: "",
     longitude: "",
   });
+  const [localDescription, setLocalDescription] = useState(
+    formData.description
+  );
+
   const [typeReports, setTypeReports] = useState([]);
   const [suggestedAddresses, setSuggestedAddresses] = useState([]);
   const [alert, setAlert] = useState({ message: null, type: null });
@@ -43,6 +48,16 @@ export default function ReportRegister() {
     console.log(name, value);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      updateField("description", localDescription);
+    }, 1000);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [localDescription]);
 
   const userLocation = () => {
     if (navigator.geolocation) {
@@ -88,21 +103,8 @@ export default function ReportRegister() {
     if (!typeReports.length) fetchTypes();
   }, [axiosInstance, typeReports]);
 
-  const useDebounce = (func, delay) => {
-    const debounceRef = useRef();
-
-    return useCallback(
-      (...args) => {
-        clearTimeout(debounceRef.current);
-        debounceRef.current = setTimeout(() => func(...args), delay);
-      },
-      [func, delay]
-    );
-  };
-
-  const handleSearchAddress = async (event) => {
-    const query = event.target.value;
-    if (query.length < 3) return;
+  const handleSearchAddress = (query) => {
+    if (query != null && query.length < 3) return;
 
     if (navigator.geolocation) {
       navigator.geolocation.getCurrentPosition(
@@ -133,7 +135,7 @@ export default function ReportRegister() {
                 id: addr.place_id,
                 street: `${addr.name || ""}, ${
                   addr.address.city || addr.address.city_district || ""
-                }.`,
+                }`,
                 district: addr.address.suburb || "",
                 lat: addr.lat,
                 lon: addr.lon,
@@ -155,7 +157,9 @@ export default function ReportRegister() {
     }
   };
 
-  const handleSearchDebounce = useDebounce(handleSearchAddress, 200);
+  const handleSearchDebounce = useDebounce(handleSearchAddress, 200, [
+    formData.street,
+  ]);
 
   const submitReport = async () => {
     const {
@@ -249,8 +253,8 @@ export default function ReportRegister() {
           rows={4}
           fullWidth
           placeholder="Descreva a ocorrência"
-          value={formData.description}
-          onChange={(e) => updateField("description", e.target.value)}
+          value={localDescription}
+          onChange={(e) => setLocalDescription(e.target.value)}
         />
 
         <Box
@@ -280,7 +284,7 @@ export default function ReportRegister() {
             sx={{ width: "100%" }}
             options={suggestedAddresses}
             value={
-              formData.street
+              formData.street && formData.district
                 ? { street: formData.street, district: formData.district }
                 : null
             }
@@ -296,12 +300,17 @@ export default function ReportRegister() {
               </li>
             )}
             onInputChange={(e, newInputValue) => {
-              updateField("street", newInputValue);
-              handleSearchDebounce(e);
+              if (formData.street !== newInputValue) {
+                handleSearchDebounce(e);
+              }
             }}
             renderInput={(params) => <TextField {...params} label="Endereço" />}
             onChange={(e, value) => {
-              if (value) {
+              if (
+                value &&
+                (formData.street !== value.street ||
+                  formData.district !== value.district)
+              ) {
                 updateField("street", value.street);
                 updateField("district", value.district);
                 updateField("latitude", value.lat);
