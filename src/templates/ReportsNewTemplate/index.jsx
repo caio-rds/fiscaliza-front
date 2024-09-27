@@ -45,7 +45,6 @@ export default function ReportRegister() {
   const isMobile = useDeviceType();
 
   const updateField = (name, value) => {
-    console.log(name, value);
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
 
